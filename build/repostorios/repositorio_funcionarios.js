@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RepositorioFuncionarios = void 0;
 const funcionario_inexistente_error_1 = require("../exception/funcionario_inexistente_error");
+const funcionario_ja_cadastrado_error_1 = require("../exception/funcionario_ja_cadastrado_error");
 const funcionario_1 = require("../model/funcionario");
 class RepositorioFuncionarios {
     constructor(database) {
@@ -18,7 +19,18 @@ class RepositorioFuncionarios {
     }
     cadastrarFuncionario(funcionario) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.database.exec(`INSERT INTO FUNCIONARIO(CPF, NOME, ENDERECO, TELEFONE, SALARIO, IS_ADMIN) VALUES ('${funcionario.cpf}', '${funcionario.nome}', '${funcionario.endereco}', '${funcionario.telefone}', ${funcionario.salario}, ${funcionario.isAdmin})`);
+            try {
+                yield this.consultarFuncionarioCPF(funcionario.cpf);
+                throw new funcionario_ja_cadastrado_error_1.FuncionarioJaCadastradoError('Esse funcionario ja está cadastrado');
+            }
+            catch (error) {
+                if (error instanceof funcionario_inexistente_error_1.FuncionarioInexistenteError) {
+                    yield this.database.exec(`INSERT INTO FUNCIONARIO(CPF, NOME, ENDERECO, TELEFONE, SALARIO, IS_ADMIN) VALUES ('${funcionario.cpf}', '${funcionario.nome}', '${funcionario.endereco}', '${funcionario.telefone}', ${funcionario.salario}, ${funcionario.isAdmin})`);
+                }
+                else {
+                    console.log(error.message);
+                }
+            }
         });
     }
     removerFuncionario(id) {

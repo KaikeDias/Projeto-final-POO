@@ -11,8 +11,18 @@ export class RepositorioVeiculos implements IRepositorioVeiculo {
     constructor(database: Database){
         this.database = database
     }
+
     async cadastrarVeiculo(veiculo: Veiculo): Promise<void> {
-        await this.database.exec(`INSERT INTO VEICULO(PLACA, MODELO, QUILOMETRAGEM, CATEGORIA, VALOR) VALUES('${veiculo.Placa}','${veiculo.Modelo}',${veiculo.Quilometragem},'${veiculo.Categoria}',${veiculo.Valor})`)
+        try {
+            await this.consultarVeiculoPlaca(veiculo.Placa)
+            throw new VeiculoJaCadastradoError('Esse veiculo já está cadastrado')
+        } catch (error: any) {
+            if(error instanceof VeiculoInexistenteError){
+                await this.database.exec(`INSERT INTO VEICULO(PLACA, MODELO, QUILOMETRAGEM, CATEGORIA, VALOR) VALUES('${veiculo.Placa}','${veiculo.Modelo}',${veiculo.Quilometragem},'${veiculo.Categoria}',${veiculo.Valor})`)
+            }else {
+                console.log(error.message)
+            }
+        }
     }
 
     async removerVeiculo(id: number): Promise<void> {
@@ -42,7 +52,13 @@ export class RepositorioVeiculos implements IRepositorioVeiculo {
     }
 
     async editarValorVeiculo(id: number, novoValor: number): Promise<void> {
-        await this.database.exec(`UPDATE VEICULO SET VALOR = ${novoValor} WHERE VEICULO_ID = ${id}`)
+        let veiculo: Veiculo | undefined = await this.consultarVeiculoId(id)
+
+        if(veiculo == undefined){
+            throw new VeiculoInexistenteError('Não existe um veiculo com essa placa')
+        }else {
+            await this.database.exec(`UPDATE VEICULO SET VALOR = ${novoValor} WHERE VEICULO_ID = ${id}`)
+        }
     }
 
     async listarVeiculos(): Promise<Veiculo[]> {

@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RepositorioVeiculos = void 0;
 const veiculo_inexistente_error_1 = require("../exception/veiculo_inexistente_error");
+const veiculo_ja_cadastrado_1 = require("../exception/veiculo_ja_cadastrado");
 const veiculo_1 = require("../model/veiculo");
 class RepositorioVeiculos {
     constructor(database) {
@@ -18,7 +19,18 @@ class RepositorioVeiculos {
     }
     cadastrarVeiculo(veiculo) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.database.exec(`INSERT INTO VEICULO(PLACA, MODELO, QUILOMETRAGEM, CATEGORIA, VALOR) VALUES('${veiculo.Placa}','${veiculo.Modelo}',${veiculo.Quilometragem},'${veiculo.Categoria}',${veiculo.Valor})`);
+            try {
+                yield this.consultarVeiculoPlaca(veiculo.Placa);
+                throw new veiculo_ja_cadastrado_1.VeiculoJaCadastradoError('Esse veiculo já está cadastrado');
+            }
+            catch (error) {
+                if (error instanceof veiculo_inexistente_error_1.VeiculoInexistenteError) {
+                    yield this.database.exec(`INSERT INTO VEICULO(PLACA, MODELO, QUILOMETRAGEM, CATEGORIA, VALOR) VALUES('${veiculo.Placa}','${veiculo.Modelo}',${veiculo.Quilometragem},'${veiculo.Categoria}',${veiculo.Valor})`);
+                }
+                else {
+                    console.log(error.message);
+                }
+            }
         });
     }
     removerVeiculo(id) {
