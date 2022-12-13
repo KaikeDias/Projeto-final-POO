@@ -12,7 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RepositorioFuncionarios = void 0;
 const funcionario_inexistente_error_1 = require("../exception/funcionario_inexistente_error");
 const funcionario_ja_cadastrado_error_1 = require("../exception/funcionario_ja_cadastrado_error");
+const atendente_1 = require("../model/atendente");
 const funcionario_1 = require("../model/funcionario");
+const gerente_1 = require("../model/gerente");
 class RepositorioFuncionarios {
     constructor(database) {
         this.database = database;
@@ -21,7 +23,7 @@ class RepositorioFuncionarios {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.consultarFuncionarioCPF(funcionario.cpf);
-                throw new funcionario_ja_cadastrado_error_1.FuncionarioJaCadastradoError('Esse funcionario ja está cadastrado');
+                throw new funcionario_ja_cadastrado_error_1.FuncionarioJaCadastradoError('\nERRO: Esse funcionario ja está cadastrado\n');
             }
             catch (error) {
                 if (error instanceof funcionario_inexistente_error_1.FuncionarioInexistenteError) {
@@ -42,11 +44,18 @@ class RepositorioFuncionarios {
         return __awaiter(this, void 0, void 0, function* () {
             let data = yield this.database.get(`SELECT * FROM FUNCIONARIO WHERE FUNCIONARIO_ID = ${id}`);
             if (data == undefined) {
-                throw new funcionario_inexistente_error_1.FuncionarioInexistenteError('Não existe um funcionario com esse id');
+                throw new funcionario_inexistente_error_1.FuncionarioInexistenteError('\nERRO: Não existe um funcionario com esse id\n');
             }
             else {
                 let funcionario = funcionario_1.Funcionario.fromMap(data);
-                return funcionario;
+                if (funcionario.isAdmin) {
+                    let gerente = new gerente_1.Gerente(funcionario.id, funcionario.cpf, funcionario.nome, funcionario.endereco, funcionario.telefone, funcionario.salario);
+                    return gerente;
+                }
+                else {
+                    let atendente = new atendente_1.Atendente(funcionario.id, funcionario.cpf, funcionario.nome, funcionario.endereco, funcionario.telefone, funcionario.salario);
+                    return atendente;
+                }
             }
         });
     }
@@ -54,11 +63,18 @@ class RepositorioFuncionarios {
         return __awaiter(this, void 0, void 0, function* () {
             let data = yield this.database.get(`SELECT * FROM FUNCIONARIO WHERE CPF = '${cpf}'`);
             if (data == undefined) {
-                throw new funcionario_inexistente_error_1.FuncionarioInexistenteError('Não existe um funcionario com esse cpf');
+                throw new funcionario_inexistente_error_1.FuncionarioInexistenteError('\nERRO: Não existe um funcionario com esse cpf\n');
             }
             else {
                 let funcionario = funcionario_1.Funcionario.fromMap(data);
-                return funcionario;
+                if (funcionario.isAdmin) {
+                    let gerente = new gerente_1.Gerente(funcionario.id, funcionario.cpf, funcionario.nome, funcionario.endereco, funcionario.telefone, funcionario.salario);
+                    return gerente;
+                }
+                else {
+                    let atendente = new atendente_1.Atendente(funcionario.id, funcionario.cpf, funcionario.nome, funcionario.endereco, funcionario.telefone, funcionario.salario);
+                    return atendente;
+                }
             }
         });
     }
@@ -66,7 +82,7 @@ class RepositorioFuncionarios {
         return __awaiter(this, void 0, void 0, function* () {
             let data = yield this.database.all(`SELECT * FROM FUNCIONARIO`);
             if (data == undefined) {
-                throw new funcionario_inexistente_error_1.FuncionarioInexistenteError('Não há funcionarios cadastrados ainda');
+                throw new funcionario_inexistente_error_1.FuncionarioInexistenteError('\nERRO: Não há funcionarios cadastrados ainda\n');
             }
             else {
                 let values = data;
@@ -77,17 +93,35 @@ class RepositorioFuncionarios {
     }
     editarEnderecoFuncionario(id, novoEndereco) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.database.exec(`UPDATE FUNCIONARIO SET ENDERECO = '${novoEndereco}' WHERE FUNCIONARIO_ID = ${id}`);
+            let funcionario = yield this.consultarFuncionarioId(id);
+            if (funcionario == undefined) {
+                throw new funcionario_inexistente_error_1.FuncionarioInexistenteError('\nERRO: Nao existe funcionário com esse ID\n');
+            }
+            else {
+                yield this.database.exec(`UPDATE FUNCIONARIO SET ENDERECO = '${novoEndereco}' WHERE FUNCIONARIO_ID = ${id}`);
+            }
         });
     }
     editarTelefoneFuncionario(id, novoTelefone) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.database.exec(`UPDATE FUNCIONARIO SET TELEFONE = '${novoTelefone}' WHERE FUNCIONARIO_ID = ${id}`);
+            let funcionario = yield this.consultarFuncionarioId(id);
+            if (funcionario == undefined) {
+                throw new funcionario_inexistente_error_1.FuncionarioInexistenteError('\nERRO: Nao existe funcionário com esse ID\n');
+            }
+            else {
+                yield this.database.exec(`UPDATE FUNCIONARIO SET TELEFONE = '${novoTelefone}' WHERE FUNCIONARIO_ID = ${id}`);
+            }
         });
     }
     editarSalarioFuncionario(id, novoSalario) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.database.exec(`UPDATE FUNCIONARIO SET SALARIO = ${novoSalario} WHERE FUNCIONARIO_ID = ${id}`);
+            let funcionario = yield this.consultarFuncionarioId(id);
+            if (funcionario == undefined) {
+                throw new funcionario_inexistente_error_1.FuncionarioInexistenteError('\nERRO: Nao existe funcionário com esse ID\n');
+            }
+            else {
+                yield this.database.exec(`UPDATE FUNCIONARIO SET SALARIO = ${novoSalario} WHERE FUNCIONARIO_ID = ${id}`);
+            }
         });
     }
 }

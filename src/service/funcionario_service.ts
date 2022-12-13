@@ -1,5 +1,7 @@
 import { PermissaoNegadaError } from "../exception/permissao_negada_error";
+import { Atendente } from "../model/atendente";
 import { Funcionario } from "../model/funcionario";
+import { Gerente } from "../model/gerente";
 import { Veiculo } from "../model/veiculo";
 import { RepositorioFuncionarios } from "../repostorios/repositorio_funcionarios";
 import { RepositorioVeiculos } from "../repostorios/repositorio_veiculos";
@@ -31,11 +33,11 @@ export class FuncionarioService {
         return await this._repositorioVeiculos.consultarVeiculoPlaca(placa)
     }
 
-    async removerVeiculoService(veiculo: Veiculo, idFuncionario: number): Promise<void> {
+    async removerVeiculoService(idVeiculo: number, idFuncionario: number): Promise<void> {
         let funcionario = await this._repositorioFuncionarios.consultarFuncionarioId(idFuncionario)
 
         if (funcionario.isAdmin) {
-            await this._repositorioVeiculos.removerVeiculo(veiculo.id)
+            await this._repositorioVeiculos.removerVeiculo(idVeiculo)
         } else {
             throw new PermissaoNegadaError('Esse funcionario nao tem permissao para executar essa funcao')
         }
@@ -116,5 +118,11 @@ export class FuncionarioService {
 
     async listarFuncionariosService(): Promise<Funcionario[]> {
         return await this._repositorioFuncionarios.listarFuncionarios()
+    }
+
+    async getBonificacaoService(id: number): Promise<number> {
+        let funcionario: Funcionario = await this.consultarFuncionarioIdService(id)
+
+        return funcionario.getBonificacao()
     }
 }

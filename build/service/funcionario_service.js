@@ -37,11 +37,11 @@ class FuncionarioService {
             return yield this._repositorioVeiculos.consultarVeiculoPlaca(placa);
         });
     }
-    removerVeiculoService(veiculo, idFuncionario) {
+    removerVeiculoService(idVeiculo, idFuncionario) {
         return __awaiter(this, void 0, void 0, function* () {
             let funcionario = yield this._repositorioFuncionarios.consultarFuncionarioId(idFuncionario);
             if (funcionario.isAdmin) {
-                yield this._repositorioVeiculos.removerVeiculo(veiculo.id);
+                yield this._repositorioVeiculos.removerVeiculo(idVeiculo);
             }
             else {
                 throw new permissao_negada_error_1.PermissaoNegadaError('Esse funcionario nao tem permissao para executar essa funcao');
@@ -132,6 +132,12 @@ class FuncionarioService {
     listarFuncionariosService() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this._repositorioFuncionarios.listarFuncionarios();
+        });
+    }
+    getBonificacaoService(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let funcionario = yield this.consultarFuncionarioIdService(id);
+            return funcionario.getBonificacao();
         });
     }
 }

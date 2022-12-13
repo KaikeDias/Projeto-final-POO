@@ -21,7 +21,7 @@ class RepositorioVeiculos {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.consultarVeiculoPlaca(veiculo.Placa);
-                throw new veiculo_ja_cadastrado_1.VeiculoJaCadastradoError('Esse veiculo já está cadastrado');
+                throw new veiculo_ja_cadastrado_1.VeiculoJaCadastradoError('\nERRO: Esse veiculo já está cadastrado\n');
             }
             catch (error) {
                 if (error instanceof veiculo_inexistente_error_1.VeiculoInexistenteError) {
@@ -42,7 +42,7 @@ class RepositorioVeiculos {
         return __awaiter(this, void 0, void 0, function* () {
             let data = yield this.database.get(`SELECT * FROM VEICULO WHERE VEICULO_ID = ${id}`);
             if (data == undefined) {
-                throw new veiculo_inexistente_error_1.VeiculoInexistenteError('Não existe um veiculo com esse id');
+                throw new veiculo_inexistente_error_1.VeiculoInexistenteError('\nERRO: Não existe um veiculo com esse id\n');
             }
             else {
                 let veiculo = veiculo_1.Veiculo.fromMap(data);
@@ -54,7 +54,7 @@ class RepositorioVeiculos {
         return __awaiter(this, void 0, void 0, function* () {
             let data = yield this.database.get(`SELECT * FROM VEICULO WHERE PLACA = '${placa}'`);
             if (data == undefined) {
-                throw new veiculo_inexistente_error_1.VeiculoInexistenteError('Não existe um veiculo com essa placa');
+                throw new veiculo_inexistente_error_1.VeiculoInexistenteError('\nERRO: Não existe um veiculo com essa placa\n');
             }
             else {
                 let veiculo = veiculo_1.Veiculo.fromMap(data);
@@ -64,14 +64,20 @@ class RepositorioVeiculos {
     }
     editarValorVeiculo(id, novoValor) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.database.exec(`UPDATE VEICULO SET VALOR = ${novoValor} WHERE VEICULO_ID = ${id}`);
+            let veiculo = yield this.consultarVeiculoId(id);
+            if (veiculo == undefined) {
+                throw new veiculo_inexistente_error_1.VeiculoInexistenteError('\nERRO: Não existe um veiculo com essa placa\n');
+            }
+            else {
+                yield this.database.exec(`UPDATE VEICULO SET VALOR = ${novoValor} WHERE VEICULO_ID = ${id}`);
+            }
         });
     }
     listarVeiculos() {
         return __awaiter(this, void 0, void 0, function* () {
             let data = yield this.database.all(`SELECT * FROM VEICULO`);
             if (data == undefined) {
-                throw new veiculo_inexistente_error_1.VeiculoInexistenteError('Não há veiculos cadastrados ainda');
+                throw new veiculo_inexistente_error_1.VeiculoInexistenteError('\nERRO: Não há veiculos cadastrados ainda\n');
             }
             else {
                 let values = data;

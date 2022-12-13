@@ -15,7 +15,7 @@ export class RepositorioVeiculos implements IRepositorioVeiculo {
     async cadastrarVeiculo(veiculo: Veiculo): Promise<void> {
         try {
             await this.consultarVeiculoPlaca(veiculo.Placa)
-            throw new VeiculoJaCadastradoError('Esse veiculo já está cadastrado')
+            throw new VeiculoJaCadastradoError('\nERRO: Esse veiculo já está cadastrado\n')
         } catch (error: any) {
             if(error instanceof VeiculoInexistenteError){
                 await this.database.exec(`INSERT INTO VEICULO(PLACA, MODELO, QUILOMETRAGEM, CATEGORIA, VALOR) VALUES('${veiculo.Placa}','${veiculo.Modelo}',${veiculo.Quilometragem},'${veiculo.Categoria}',${veiculo.Valor})`)
@@ -33,7 +33,7 @@ export class RepositorioVeiculos implements IRepositorioVeiculo {
         let data: Object | undefined = await this.database.get(`SELECT * FROM VEICULO WHERE VEICULO_ID = ${id}`)
 
         if(data == undefined) {
-            throw new VeiculoInexistenteError('Não existe um veiculo com esse id')
+            throw new VeiculoInexistenteError('\nERRO: Não existe um veiculo com esse id\n')
         }else {
             let veiculo: Veiculo = Veiculo.fromMap(data)
             return veiculo
@@ -44,7 +44,7 @@ export class RepositorioVeiculos implements IRepositorioVeiculo {
         let data: Object | undefined = await this.database.get(`SELECT * FROM VEICULO WHERE PLACA = '${placa}'`)
 
         if(data == undefined) {
-            throw new VeiculoInexistenteError('Não existe um veiculo com essa placa')
+            throw new VeiculoInexistenteError('\nERRO: Não existe um veiculo com essa placa\n')
         }else {
             let veiculo: Veiculo = Veiculo.fromMap(data)
             return veiculo
@@ -55,7 +55,7 @@ export class RepositorioVeiculos implements IRepositorioVeiculo {
         let veiculo: Veiculo | undefined = await this.consultarVeiculoId(id)
 
         if(veiculo == undefined){
-            throw new VeiculoInexistenteError('Não existe um veiculo com essa placa')
+            throw new VeiculoInexistenteError('\nERRO: Não existe um veiculo com essa placa\n')
         }else {
             await this.database.exec(`UPDATE VEICULO SET VALOR = ${novoValor} WHERE VEICULO_ID = ${id}`)
         }
@@ -65,7 +65,7 @@ export class RepositorioVeiculos implements IRepositorioVeiculo {
         let data: Object | undefined = await this.database.all(`SELECT * FROM VEICULO`)
 
         if(data == undefined) {
-            throw new VeiculoInexistenteError('Não há veiculos cadastrados ainda')
+            throw new VeiculoInexistenteError('\nERRO: Não há veiculos cadastrados ainda\n')
         }else {
             let values = <Array<Object>> data
 
